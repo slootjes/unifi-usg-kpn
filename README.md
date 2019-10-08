@@ -93,10 +93,10 @@ Notes:
 Let's get started.
 
 Pull the `config.gateway.json`  from the repo and change the following:
-1. Replace the MAC address placeholder `xx-xx-xx-xx-xx-xx` with the real MAC address of the USG (see *Setup basic Internet, step 2*).
-2. Adjust the IP ranges / DHCP ranges to you're liking (currently `192.168.100.1/24`) but they can be any range as long as they do not overlap public IP spaces (duh) and the IPTV ranges KPN uses.
-3. Save the file (using UNIX file format)
-4. (optional) Use an online JSON validator to check of you have created / not corrupted the JSON file.
+1. Adjust the IP ranges / DHCP ranges to you're liking (currently `192.168.100.1/24`) but they can be any range as long as they do not overlap public IP spaces (duh) and the IPTV ranges KPN uses.
+2. Save the file (using UNIX file format)
+3. (optional) Use an online JSON validator to check of you have created / not corrupted the JSON file.
+4. (optional) If you want to put your decoders into their own VLAN make sure to first read the VLANs section before continuing.
 
 ### 3. Publish and provision the configuration
 In order for the file to by applied to the USG you need to upload it to the **Unifi Controller** from there you can provision it to the USG.
@@ -133,6 +133,39 @@ The routed IP network sometimes changes, therefore the next-hop settings for rou
 Wait for it.... you're done. The Internet and IPTV should be working. Test you're IPTV by rebooting the decoders and see if they come back online. If not... read below.
 
 In case the USG or IPTV doesn't work, please consult the section "Troubleshooting" below.
+
+## VLANs
+
+If you are using VLANs and have issues with the IPTV having hickups or being frozen you can try to change the config as follows:
+
+At the "igmp-proxy" section replace "eth1" with "eth.{vlan}" where {vlan} would be the VLAN where your decoders are in. 
+
+```
+"eth1.100": {
+    "alt-subnet": [
+        "0.0.0.0/0"
+    ],
+    "role": "downstream",
+    "threshold": "1"
+}
+```
+
+To prevent the IPTV from flooding other network interfaces it's best to explicitly disable the proxy for these interfaces:
+
+```
+"eth1": {
+    "role": "disabled",
+    "threshold": "1"
+},
+"eth1.200": {
+    "role": "disabled",
+    "threshold": "1"
+},
+"eth1.300": {
+    "role": "disabled",
+    "threshold": "1"
+}
+```
 
 ## Troubleshooting
 This section describes some of the most commmon issues and (possible) solutions. If these tips don't help you, read the articles mentioned below. Further sources of wisdom include the UBNT, Tweakers.net and KPN fora.
